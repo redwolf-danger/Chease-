@@ -1,0 +1,24 @@
+1. best practices for application is to pur everything related to app in src folder(configs and entryy file)
+2. js notation of adding package using dots
+3. use .js at the end if we are using import with local files and not in node modules
+4. once dotenv imported in main doesn't need to be imported seperately again and again
+5. similarly once db connected we can directly use user.findOne() instead of making connection again
+5. PUT DATABASE NAME BEFORE ? IN MONGODB uri
+
+6. 
+
+Smx5X9jUydSk9C0J
+
+
+PLAN:
+- Two tables
+
+_id will be automatically created by mongodb
+createdAt
+updatedAt
+- one for users email + fullname + password + profilePic
+- messages senderId + receiverId + text + image
+
+
+MODIFICATIONS
+I don't want to connect with mongodb again and again

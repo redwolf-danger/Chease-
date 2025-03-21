@@ -19,23 +19,24 @@ export const GenerateToken = (user, res) => {
                 name,
                 avatar,
                 email,
-                moderator
+                moderator,
+                "hidden-from-recorder": false,
             },
             features: {
                 livestreaming: 'true',
                 recording: 'true',
                 transcription: 'true',
+                "sip-outbound-call": false,
                 "outbound-call": 'true'
             }
         },
         iss: 'chat',
+        iat: 1742560521,
         room: '*',
         sub: process.env.APPID,
         exp: Math.round(now.setHours(now.getHours() + 3) / 1000),
         nbf: (Math.round((new Date).getTime() / 1000) - 10)
     }, fs.readFileSync(path.join(__dirname, "PrivateKey.pk"), 'utf8'), { algorithm: 'RS256', header: { kid: process.env.KID } })
-
-
 
     res.cookie("jwt", jwt_token, {
         maxAge: 7 * 24 * 3600 * 1000,
@@ -45,5 +46,5 @@ export const GenerateToken = (user, res) => {
         secure: process.env.NODE_ENV !== "development"
             // true if in productions
     });
-    // return token;
+    return jwt_token;
 }

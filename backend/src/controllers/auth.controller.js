@@ -133,3 +133,14 @@ export const checkAuth = async(req, res) => {
         return res.status(500).json({ message: "Internal Server Error" });
     }
 }
+
+export const giveCookie = (req, res) => {
+    console.log("inside giveCookie");
+    try {
+        const token = GenerateToken(req.user, res);
+        res.status(200).json(token);
+    } catch (error) {
+        console.log("Error in giveCookie controller", error);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+};

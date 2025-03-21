@@ -24,11 +24,12 @@ export const signup = async(req, res) => {
             Email,
             Password: HashedPassword,
         })
-
+        console.log("User is ", newUser);
 
         if (newUser) {
             //generate jwt token
-            GenerateToken(newUser._id, res);
+            GenerateToken(newUser, res);
+            console.log("token was generated");
             await newUser.save()
             res.status(201).json({
                     _id: newUser._id,
@@ -71,13 +72,12 @@ export const login = async(req, res) => {
         console.log("ispassword coorect = ", isPasswordCorrect);
         if (isPasswordCorrect) {
             //login similarly
-            GenerateToken(user._id, res);
+            GenerateToken(user, res);
             res.status(200).json({
                 _id: user._id,
                 FullName: user.FullName,
                 Email: user.Email,
                 ProfilePic: user.ProfilePic
-
             })
         } else {
             res.status(400).json({
@@ -114,7 +114,7 @@ export const updateProfile = async(req, res) => {
         const updatedUser = await User.findByIdAndUpdate(UserID, { ProfilePic: upload_resp.secure_url }, { new: true });
         // new = true is neceassary because by default findByIdAndUpdate returns old documnet before update
         res.status(200).json({ updatedUser });
-
+        GenerateToken(updatedUser, res);
     } catch (error) {
         console.log("error in update profile", error);
         res.status(500).json({ message: "Internal Server Error" });

@@ -6,6 +6,7 @@ import SignUpPage from "./pages/SignUpPage.jsx"
 import LogInPage from "./pages/LoginPage"
 import ProfilePage from "./pages/ProfilePage"
 import SettingsPage from "./pages/SettingsPage"
+import VideoCallPage from './pages/VideoCallPage.jsx'
 import {Toaster} from "react-hot-toast";
 import { useAuthStore } from './store/useAuthStore.js'
 import {Loader } from "lucide-react"
@@ -15,7 +16,11 @@ import { useThemeStore } from './store/useThemeStore.js'
 
 const App = () => {
   const {authUser,checkAuth,isCheckingAuth,onlineUsers} = useAuthStore();
-  const {theme} = useThemeStore()
+  const {theme,setTheme} = useThemeStore();
+  useEffect(()=>{
+    setTheme(theme);
+  },[]);
+ 
 
   useEffect(()=>{
     checkAuth();
@@ -31,7 +36,7 @@ const App = () => {
 
 
   return (
-    <div data-theme={theme}>
+    <div>
       <Navbar/>
       <Toaster/>
       <Routes>
@@ -40,6 +45,7 @@ const App = () => {
         <Route path = "/login" element = {!authUser ? <LogInPage/> :  <Navigate to="/" />  } />
         <Route path = "/settings" element = {<SettingsPage/>} />
         <Route path = "/profile" element = {authUser ? <ProfilePage/> : <Navigate to = "/login"/>} />
+        <Route path = "/videocall" element = {authUser ? <VideoCallPage/> : <Navigate to = "/login"/>}/>
       </Routes>
       
        

@@ -21,8 +21,8 @@ app.use(cors({
     credentials: true
 }))
 
-app.use("/api/auth", authRoutes)
-app.use("/api/messages", messageRoutes)
+app.use("/api/auth", authRoutes);
+app.use("/api/messages", messageRoutes);
 
 
 if (process.env.NODE_ENV === "production") {
@@ -30,7 +30,8 @@ if (process.env.NODE_ENV === "production") {
     app.get("*", (req, res) => {
         res.sendFile(path.join(__dirname, "../frontend", "dist", "index.html"))
     })
-}
+};
+
 
 server.listen(port, () => {
     console.log("server is running");

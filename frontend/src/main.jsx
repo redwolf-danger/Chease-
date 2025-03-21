@@ -6,10 +6,10 @@ import {BrowserRouter} from "react-router-dom"
 
 
 createRoot(document.getElementById('root')).render(
-  <StrictMode>
+  // <StrictMode>
     <BrowserRouter>
     {/* to make use of react router dom */}
     <App />
     </BrowserRouter>
-  </StrictMode>,
+  // </StrictMode>,
 )

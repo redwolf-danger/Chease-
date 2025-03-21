@@ -35,7 +35,9 @@ export const signup = async(req, res) => {
                     _id: newUser._id,
                     FullName: newUser.FullName,
                     Email: newUser.Email,
-                    ProfilePic: newUser.ProfilePic
+                    ProfilePic: newUser.ProfilePic,
+                    updatedAt: newUser.updatedAt,
+                    createdAt: newUser.createdAt,
                 })
                 //try to see what happens if i remove it in both signup and login
         } else {
@@ -77,7 +79,9 @@ export const login = async(req, res) => {
                 _id: user._id,
                 FullName: user.FullName,
                 Email: user.Email,
-                ProfilePic: user.ProfilePic
+                ProfilePic: user.ProfilePic,
+                updatedAt: user.updatedAt,
+                createdAt: user.createdAt,
             })
         } else {
             res.status(400).json({

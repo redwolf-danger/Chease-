@@ -7,7 +7,7 @@ import cookieParser from "cookie-parser"
 import cors from "cors"
 import { app, server } from "./lib/socket.lib.js"
 import path from "path";
-import { FireApp } from './lib/db/firebase.db.lib.js';
+import { FireApp } from "./lib/db/FireBase.db.lib.js";
 
 const __dirname = path.resolve();
 

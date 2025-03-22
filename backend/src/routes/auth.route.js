@@ -17,7 +17,7 @@ router.get("/check", protectRoute, checkAuth);
 
 router.post("/giveCookie", protectRoute, giveCookie);
 router.post("/test1", test1)
-router.post("/test2", test2)
+router.get("/test2", protectRoute, test2)
 router.post("/test3", test3)
 router.post("/test4", test4)
 

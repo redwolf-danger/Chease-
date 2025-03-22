@@ -17,12 +17,15 @@ export const protectRoute = async(req, res, next) => {
         if (!decoded) {
             return res.status(401).json({ message: "Unauthorized - Invalid Token" });
         };
-        // console.log("decoded is ", decoded);
-        const user = await User.findById(decoded.context.user.id).select("-Password");
-        if (!user) {
-            return res.status(404).json({ message: "User Not Found" });
-        }
-        req.user = user;
+        console.log("inside protectRoute");
+        console.log("decoded is ", decoded);
+        // todo: fetch the user from the firestore
+
+        // const user = await User.findById(decoded.context.user.id).select("-Password");
+        // if (!user) {
+        //     return res.status(404).json({ message: "User Not Found" });
+        // }
+        // req.user = user;
         next();
 
     } catch (error) {

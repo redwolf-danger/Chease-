@@ -2,10 +2,46 @@ import cloudinary from "../lib/cloudinary.lib.js";
 import { GenerateToken } from "../lib/utils.lib.js";
 import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
-// import { email_signup, email_siginin } from "../lib/db/FireAuth.db.lib.js";
+import admin from "firebase-admin"
+
+
 export const signup = async(req, res) => {
+    //todo: check for fields format more strictly on the firebase backend
+    const { tokenId } = req.body
+        //verify the token and if it is correct make a jwt 
+    try {
+        const { uid } = await admin.auth().verifyIdToken(tokenId);
+        console.log("uid is ", uid);
+        const x = await admin.auth().getUser(uid);
+        console.log("x is ", x)
+        const {
+            photoURL: ProfilePic,
+            displayName: FullName,
+            email: Email,
+            metadata: {
+                creationTime: createdAt,
+                lastSignInTime
+            }
+        } = x;
+        const newUser = {
+            ProfilePic,
+            FullName,
+            Email,
+            _id: uid,
+            createdAt,
+            lastSignInTime
+        };
+        console.log("new user is ", newUser);
+        // todo store the user in firestore so that we can query easily
+
+        GenerateToken(newUser, res);
+        return res.status(201).json(newUser);
+    } catch (error) {
+        console.log(error);
+        return res.status(400).json({ message: "Invalid User data" })
+    }
     // try {
-    //     //todo: check for fields format more strictly
+    //    
 
     //     const { FullName, Email, Password } = req.body;
     //     if (!FullName || !Password || !Email) {
@@ -65,6 +101,39 @@ export const signup = async(req, res) => {
     // }
 };
 export const login = async(req, res) => {
+    //todo: check for fields format more strictly on the firebase backend
+    const { tokenId } = req.body
+        //verify the token and if it is correct make a jwt 
+    try {
+        const { uid } = await admin.auth().verifyIdToken(tokenId);
+        console.log("uid is ", uid);
+        const x = await admin.auth().getUser(uid);
+        console.log("x is ", x)
+        const {
+            photoURL: ProfilePic,
+            displayName: FullName,
+            email: Email,
+            metadata: {
+                creationTime: createdAt,
+                lastSignInTime
+            }
+        } = x;
+        const newUser = {
+            ProfilePic,
+            FullName,
+            Email,
+            _id: uid,
+            createdAt,
+            lastSignInTime
+        };
+        console.log("new user is ", newUser);
+        // todo don't store the user in firestore here rather update it
+        GenerateToken(newUser, res);
+        return res.status(201).json(newUser);
+    } catch (error) {
+        console.log(error);
+        return res.status(400).json({ message: "Invalid User data" })
+    };
     // try {
     //     const { Email, Password } = req.body;
     //     if (!Email || !Password) {

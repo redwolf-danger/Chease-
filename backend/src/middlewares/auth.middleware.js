@@ -17,7 +17,7 @@ export const protectRoute = async(req, res, next) => {
         if (!decoded) {
             return res.status(401).json({ message: "Unauthorized - Invalid Token" });
         };
-        console.log("decoded is ", decoded);
+        // console.log("decoded is ", decoded);
         const user = await User.findById(decoded.context.user.id).select("-Password");
         if (!user) {
             return res.status(404).json({ message: "User Not Found" });
@@ -26,7 +26,7 @@ export const protectRoute = async(req, res, next) => {
         next();
 
     } catch (error) {
-        console.log("Route is not protected", error.message);
+        // console.log("Route is not protected", error.message);
         res.status(500).json({
             message: "Internal Server Error"
         });

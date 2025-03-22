@@ -48,3 +48,8 @@ export const GenerateToken = (user, res) => {
     });
     return jwt_token;
 }
+
+// export const
+export const formatPrivateKey = (key) => {
+    return key.replace(/\\n/g, "\n");
+}

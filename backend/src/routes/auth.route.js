@@ -1,6 +1,7 @@
 import express from "express"
 import { signup, login, logout, updateProfile, checkAuth, giveCookie } from "../controllers/auth.controller.js";
 import { protectRoute } from "../middlewares/auth.middleware.js";
+import { test1, test2, test3, test4 } from "../controllers/test.controllers.js";
 const router = express.Router()
 
 router.post("/signup", signup)
@@ -15,5 +16,9 @@ router.get("/check", protectRoute, checkAuth);
 //to see if route is protected or
 
 router.post("/giveCookie", protectRoute, giveCookie);
+router.post("/test1", test1)
+router.post("/test2", test2)
+router.post("/test3", test3)
+router.post("/test4", test4)
 
 export default router

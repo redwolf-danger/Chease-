@@ -2,6 +2,7 @@ import jwt from "jsonwebtoken"
 import User from "../models/user.model.js"
 import fs from "fs";
 import path from "path";
+import { get_user } from "../lib/db/FireStore.db.lib.js";
 
 
 const __dirname = path.resolve();
@@ -20,16 +21,18 @@ export const protectRoute = async(req, res, next) => {
         console.log("inside protectRoute");
         console.log("decoded is ", decoded);
         // todo: fetch the user from the firestore
-
-        // const user = await User.findById(decoded.context.user.id).select("-Password");
-        // if (!user) {
-        //     return res.status(404).json({ message: "User Not Found" });
-        // }
-        // req.user = user;
+        const { context: { user: { id } } } = decoded;
+        const user = await get_user(id);
+        if (!user) {
+            res.status(404).json({ message: "User Not Found" });
+        }
+        req.user = user;
+        console.log("user = , ", user)
         next();
 
     } catch (error) {
-        // console.log("Route is not protected", error.message);
+        console.log("Route is not protected", error.message);
+        console.log(error);
         res.status(500).json({
             message: "Internal Server Error"
         });

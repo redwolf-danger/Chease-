@@ -13,7 +13,6 @@ router.post("/logout", logout)
 router.put("/update-profile", protectRoute, updateProfile)
 
 router.get("/check", protectRoute, checkAuth);
-//to see if route is protected or
 
 router.post("/giveCookie", protectRoute, giveCookie);
 router.post("/test1", test1)

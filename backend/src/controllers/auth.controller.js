@@ -1,4 +1,5 @@
 import cloudinary from "../lib/cloudinary.lib.js";
+import { get_user, save_user, update_user } from "../lib/db/FireStore.db.lib.js";
 import { GenerateToken } from "../lib/utils.lib.js";
 import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
@@ -11,9 +12,7 @@ export const signup = async(req, res) => {
         //verify the token and if it is correct make a jwt 
     try {
         const { uid } = await admin.auth().verifyIdToken(tokenId);
-        console.log("uid is ", uid);
         const x = await admin.auth().getUser(uid);
-        console.log("x is ", x)
         const {
             photoURL: ProfilePic,
             displayName: FullName,
@@ -24,7 +23,7 @@ export const signup = async(req, res) => {
             }
         } = x;
         const newUser = {
-            ProfilePic,
+            ProfilePic: ProfilePic ? ProfilePic : "",
             FullName,
             Email,
             _id: uid,
@@ -32,7 +31,7 @@ export const signup = async(req, res) => {
             lastSignInTime
         };
         console.log("new user is ", newUser);
-        // todo store the user in firestore so that we can query easily
+        await save_user(newUser);
 
         GenerateToken(newUser, res);
         return res.status(201).json(newUser);
@@ -102,13 +101,11 @@ export const signup = async(req, res) => {
 };
 export const login = async(req, res) => {
     //todo: check for fields format more strictly on the firebase backend
-    const { tokenId } = req.body
-        //verify the token and if it is correct make a jwt 
+    const { tokenId } = req.body;
+    //verify the token and if it is correct make a jwt 
     try {
         const { uid } = await admin.auth().verifyIdToken(tokenId);
-        console.log("uid is ", uid);
         const x = await admin.auth().getUser(uid);
-        console.log("x is ", x)
         const {
             photoURL: ProfilePic,
             displayName: FullName,
@@ -119,7 +116,7 @@ export const login = async(req, res) => {
             }
         } = x;
         const newUser = {
-            ProfilePic,
+            ProfilePic: ProfilePic ? ProfilePic : "",
             FullName,
             Email,
             _id: uid,
@@ -127,7 +124,8 @@ export const login = async(req, res) => {
             lastSignInTime
         };
         console.log("new user is ", newUser);
-        // todo don't store the user in firestore here rather update it
+        update_user(uid, newUser);
+
         GenerateToken(newUser, res);
         return res.status(201).json(newUser);
     } catch (error) {
@@ -196,17 +194,16 @@ export const logout = (req, res) => {
 export const updateProfile = async(req, res) => {
     try {
         const { ProfilePic } = req.body;
-        const UserID = req.user._id;
+        const uid = req.user._id;
         if (!ProfilePic) {
             return res.status(400).json({ message: "Profile Pic not given" });
         }
         const upload_resp = await cloudinary.uploader.upload(ProfilePic);
-        const updatedUser = await User.findByIdAndUpdate(
-            UserID, { ProfilePic: upload_resp.secure_url }, { new: true }
-        );
-        // new = true is neceassary because by default findByIdAndUpdate returns old documnet before update
-        res.status(200).json({ updatedUser });
+        // todo: instead of this update the user in firestore
+        const updatedUser = {...req.user, ProfilePic: upload_resp.secure_url };
+        await update_user(uid, updatedUser);
         GenerateToken(updatedUser, res);
+        res.status(200).json({ data: updatedUser });
     } catch (error) {
         console.log("error in update profile", error);
         res.status(500).json({ message: "Internal Server Error" });
@@ -223,7 +220,6 @@ export const checkAuth = async(req, res) => {
 };
 
 export const giveCookie = (req, res) => {
-    // console.log("inside giveCookie");
     try {
         const token = GenerateToken(req.user, res);
         res.status(200).json(token);

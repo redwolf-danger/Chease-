@@ -3,7 +3,7 @@ import { axiosInstance } from "../lib/axios"
 import toast from "react-hot-toast";
 import { io } from "socket.io-client"
 import { auth } from "../lib/Firebase/FireAuth.js";
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile as updProf } from "firebase/auth";
 
 
 const BASE_URL =
@@ -35,15 +35,15 @@ export const useAuthStore = create((set, get) => ({
         set({ isSigningUp: true });
         try {
             const { user } = await createUserWithEmailAndPassword(auth, Email, Password);
-            await updateProfile(user, {
+            await updProf(user, {
                 displayName: FullName,
             });
 
-
-            const { photoURL, uid, metadata: { creationTime: createdAt, lastSignInTime } } = auth.currentUser;
+            // const { photoURL, uid, metadata: { creationTime: createdAt, lastSignInTime } } = auth.currentUser;
             const tokenId = await auth.currentUser.getIdToken();
 
-            const data = { ProfilePic: photoURL, FullName, Email, _id: uid, createdAt, lastSignInTime, tokenId };
+            //  ProfilePic: photoURL, FullName, Email, _id: uid, createdAt, lastSignInTime, 
+            const data = { tokenId };
             //todo make a query to backend to get the user and 
             // todo: modify _id to uid
 
@@ -96,14 +96,20 @@ export const useAuthStore = create((set, get) => ({
     login: async({ Email, Password }) => {
         set({ isLoggingIn: true });
         try {
-            const res = await signInWithEmailAndPassword(auth, Email, Password)
-            console.log("user is ", res);
-            // todo: add code her to connect to socket and go to login route
+            // const { user: { uid } } =
+            // console.log("user is ", uid);
+            await signInWithEmailAndPassword(auth, Email, Password)
+            const tokenId = await auth.currentUser.getIdToken();
+            const data = { tokenId }
+            const res = await axiosInstance.post("/auth/login", data);
             toast.success("Logged In successfully")
+            set({ authUser: res.data });
+            get().connectSocket();
 
         } catch (error) {
             const errorCode = error.code;
             const errorMessage = error.message;
+            console.log('error is', error);
             console.log("error code is", errorCode);
             console.log("error message is ", errorMessage);
             toast.error("Error in Signing In")
@@ -136,16 +142,18 @@ export const useAuthStore = create((set, get) => ({
 
         try {
             const res = await axiosInstance.put("/auth/update-profile", data);
+            const { ProfilePic } = res.data;
+            const user = auth.currentUser;
+            await updProf(user, { photoURL: ProfilePic })
             set({ authUser: res.data });
             toast.success("Profile updates successfully")
         } catch (error) {
-            console.log(error.response.data.message);
+            console.log("error in updating profile")
+            console.log(error);
             toast.error(error.response.data.message);
-
         } finally {
             set({ isUpdatingProfile: false });
         }
-
     },
     connectSocket: () => {
         const { authUser } = get()

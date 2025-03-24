@@ -11,7 +11,7 @@ import {Toaster} from "react-hot-toast";
 import { useAuthStore } from './store/useAuthStore.js'
 import {Loader } from "lucide-react"
 import { useThemeStore } from './store/useThemeStore.js'
-import { useVideoStore } from './store/useVideoStore.js'
+// import { useVideoStore } from './store/useVideoStore.js'
 
 
 

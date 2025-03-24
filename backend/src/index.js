@@ -9,6 +9,11 @@ import { app, server } from "./lib/socket.lib.js"
 import path from "path";
 import { FireApp } from "./lib/db/FireBase.db.lib.js";
 
+if (!FireApp) {
+    console.log("FireBase is running .... ");
+}
+
+
 const __dirname = path.resolve();
 
 

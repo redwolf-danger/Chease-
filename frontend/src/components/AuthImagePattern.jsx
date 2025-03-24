@@ -1,3 +1,6 @@
+//-------------------------------------------------
+//no change here
+
 import React from 'react'
 const AuthImagePattern = ({ title, subtitle }) => {
   return (

@@ -5,8 +5,11 @@ import { Users } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
 
 const Sidebar = () => {
+    try{
 
+    
     const {getUsers, users, selectedUser,setSelectedUser,isUsersLoading} = useChatStore();
+    console.log("users is ",users);
     const {onlineUsers} = useAuthStore();
     const [showOnlineOnly,setShowOnlineOnly] = useState(false);
     const filteredUsers = showOnlineOnly ?  users.filter(user => onlineUsers.includes(user._id)): users;
@@ -44,7 +47,7 @@ const Sidebar = () => {
 
 
         <div className="overflow-y-auto w-full py-3">
-        {filteredUsers.map((user) => (
+        {filteredUsers && filteredUsers.map((user) => (
           <button
             key={user._id}
             onClick={() => setSelectedUser(user)}
@@ -77,10 +80,13 @@ const Sidebar = () => {
             </div>
           </button>
         ))}
-        {filteredUsers.length === 0 && <div className='text-center text-zinc-500 py-4'>No Online Users</div>}
+        {filteredUsers && <div className='text-center text-zinc-500 py-4'>No Online Users</div>}
         </div>
     </aside>
-  )
+  )}
+  catch(error){
+    console.log("error is ",error);
+  }
 }
 
 export default Sidebar

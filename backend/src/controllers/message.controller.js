@@ -2,32 +2,31 @@ import User from "../models/user.model.js";
 import Message from "../models/message.models.js";
 import cloudinary from "../lib/cloudinary.lib.js";
 import { getReceiverSocketId, io } from "../lib/socket.lib.js";
+import { fetchUsers } from "../lib/db/FireStore.db.lib.js";
 
 export const getUsersForSidebar = async(req, res) => {
-
-
     try {
-        const loggedInUserId = req.user._id;
-        const filteredUsers = await User.find({ _id: { $ne: loggedInUserId } }).select("-Password");
+        // const loggedInUserId = req.user._id;
+        console.log(req.user.handle);
+        const contacts = await fetchUsers(req.user.handle);
+        console.log("contacts is ", contacts);
+        return res.status(200).json({ filteredUsers: contacts });
+        // const filteredUsers = await User.find({ _id: { $ne: loggedInUserId } }).select("-Password");
         // modify only users which we have communicated with
+        // res.status(200).json({
+        //     filteredUsers
+        // })
 
-        res.status(200).json({
-            filteredUsers
-        })
     } catch (error) {
         console.log('Error in getUsersForSidebar', error.message);
         res.status(500).json({ message: "Internal Server Error" })
-
-
     }
 }
 
 export const getMessages = async(req, res) => {
-
     try {
         const { id: userToChatId } = req.params
         const myId = req.user._id;
-
 
         const messages = await Message.find({
             $or: [{

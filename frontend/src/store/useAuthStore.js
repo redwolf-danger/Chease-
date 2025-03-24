@@ -1,9 +1,9 @@
 import { create } from "zustand"
-import { axiosInstance } from "../lib/axios"
+import { axiosInstance } from "../lib/axios.js"
 import toast from "react-hot-toast";
 import { io } from "socket.io-client"
-import { auth } from "../lib/Firebase/FireAuth.js";
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile as updProf } from "firebase/auth";
+import { auth, provider } from "../lib/Firebase/FireAuth.js";
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile as updProf, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 
 
 const BASE_URL =
@@ -31,32 +31,27 @@ export const useAuthStore = create((set, get) => ({
             set({ isCheckingAuth: false });
         }
     },
-    signup: async({ FullName, Email, Password }) => {
+    googleSignIn: async() => {
         set({ isSigningUp: true });
         try {
-            const { user } = await createUserWithEmailAndPassword(auth, Email, Password);
-            await updProf(user, {
-                displayName: FullName,
-            });
-
-            // const { photoURL, uid, metadata: { creationTime: createdAt, lastSignInTime } } = auth.currentUser;
-            const tokenId = await auth.currentUser.getIdToken();
-
-            //  ProfilePic: photoURL, FullName, Email, _id: uid, createdAt, lastSignInTime, 
-            const data = { tokenId };
-            //todo make a query to backend to get the user and 
-            // todo: modify _id to uid
-
+            const result = await signInWithPopup(auth, provider);
+            const tokenId = await result.user.getIdToken();
+            // todo: add a way to get unique handle 
+            const handle = "this_unique";
+            const data = {
+                tokenId,
+                handle
+            };
             const res = await axiosInstance.post("/auth/signup", data);
             toast.success("Account created successfully");
             set({ authUser: res.data });
             get().connectSocket()
-
         } catch (error) {
             const errorCode = error.code;
             const errorMessage = error.message;
             console.log("error code is", errorCode);
             console.log("error message is ", errorMessage);
+            console.log(error);
             toast.error("Error in Signing up")
             if (errorCode == "auth/email-already-in-use") {
                 toast.error("Email is already in use");
@@ -67,21 +62,42 @@ export const useAuthStore = create((set, get) => ({
             set({ isSigningUp: false });
         }
     },
-    // todo change this soon
-    // signup: async(data) => {
-    //     set({ isSigningUp: true });
-    //     try {
-    //         const res = await axiosInstance.post("/auth/signup", data);
-    //         toast.success("Account created successfully");
-    //         set({ authUser: res.data });
-    //         get().connectSocket()
-    //     } catch (error) {
-    //         toast.error(error.response.data.message)
-    //         console.log("Error in signing up");
-    //     } finally {
-    //         set({ isSigningUp: false });
-    //     }
-    // },
+    signup: async({ FullName, Email, Password }) => {
+        set({ isSigningUp: true });
+        try {
+            const { user } = await createUserWithEmailAndPassword(auth, Email, Password);
+            await updProf(user, {
+                displayName: FullName,
+            });
+            const tokenId = await auth.currentUser.getIdToken();
+            // todo: add a way to get "unique" handle 
+            const handle = "this_unique" + `${Math.random() * 10}`;
+            const data = {
+                tokenId,
+                handle
+            };
+            // todo: modify _id to uid
+            const res = await axiosInstance.post("/auth/signup", data);
+            toast.success("Account created successfully");
+            set({ authUser: res.data });
+            get().connectSocket()
+
+        } catch (error) {
+            const errorCode = error.code;
+            const errorMessage = error.message;
+            console.log("error code is", errorCode);
+            console.log("error message is ", errorMessage);
+            console.log(error);
+            toast.error("Error in Signing up")
+            if (errorCode == "auth/email-already-in-use") {
+                toast.error("Email is already in use");
+            } else {
+                toast.error(error.response.data.message)
+            }
+        } finally {
+            set({ isSigningUp: false });
+        }
+    },
     logout: async() => {
 
         try {
@@ -139,13 +155,13 @@ export const useAuthStore = create((set, get) => ({
     // },
     updateProfile: async(data) => {
         set({ isUpdatingProfile: true });
-
         try {
             const res = await axiosInstance.put("/auth/update-profile", data);
             const { ProfilePic } = res.data;
+            // console.log("new data from backend is", res.data);
+            set({ authUser: res.data });
             const user = auth.currentUser;
             await updProf(user, { photoURL: ProfilePic })
-            set({ authUser: res.data });
             toast.success("Profile updates successfully")
         } catch (error) {
             console.log("error in updating profile")

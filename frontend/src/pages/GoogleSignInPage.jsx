@@ -10,7 +10,7 @@ const GooglePageSignIn = () => {
   return (
     <div>
         <form onSubmit={handleSubmit}>
-        <button type="submit" disabled = {SigningUp}>Sign Up with Google</button>
+        <button type="submit" disabled = {SigningUp}>Google</button>
         </form>
     </div>
   )

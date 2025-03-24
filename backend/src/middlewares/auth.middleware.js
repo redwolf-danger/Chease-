@@ -18,21 +18,21 @@ export const protectRoute = async(req, res, next) => {
         if (!decoded) {
             return res.status(401).json({ message: "Unauthorized - Invalid Token" });
         };
-        console.log("inside protectRoute");
-        console.log("decoded is ", decoded);
+        // console.log("inside protectRoute");
+        // console.log("decoded is ", decoded);
         // todo: fetch the user from the firestore
         const { context: { user: { id } } } = decoded;
         const user = await get_user(id);
         if (!user) {
-            res.status(404).json({ message: "User Not Found" });
+            return res.status(404).json({ message: "User Not Found" });
         }
         req.user = user;
         console.log("user = , ", user)
         next();
 
     } catch (error) {
-        console.log("Route is not protected", error.message);
-        console.log(error);
+        // console.log("Route is not protected", error.message);
+        // console.log(error);
         res.status(500).json({
             message: "Internal Server Error"
         });

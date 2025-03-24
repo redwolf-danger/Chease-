@@ -19,6 +19,8 @@ io.on("connection", (socket) => {
     if (userId) {
         userSocketMap[userId] = socket.id;
     }
+
+    // todo devise a mechanism so that i don't have to emit the whole map everytime a user gets online
     io.emit("getOnlineUsers", Object.keys(userSocketMap))
 
     // console.log("A user connected", socket.id);

@@ -1,8 +1,6 @@
 import React, { useEffect,useState } from 'react'
-import {Loader } from "lucide-react"
-// import { useVideoStore } from '../store/useVideoStore';
+import { Loader } from "lucide-react"
 import { JaaSMeeting } from '@jitsi/react-sdk';
-import Cookies from "js-cookie";
 import { axiosInstance } from '../lib/axios';
 import toast from 'react-hot-toast';
 

@@ -2,9 +2,9 @@ import { Server } from "socket.io"
 import http from "http";
 import express from "express"
 
-const app = express();
-const server = http.createServer(app);
-const io = new Server(server, {
+export const app = express();
+export const server = http.createServer(app);
+export const io = new Server(server, {
     cors: {
         origin: ["http://localhost:5173"]
     }
@@ -12,26 +12,49 @@ const io = new Server(server, {
 
 //USED TO STORE ONLINE USERS
 const userSocketMap = {};
-// userId: socketId
+// handle: socketId
+
+
 
 io.on("connection", (socket) => {
-    const userId = socket.handshake.query.userId;
-    if (userId) {
-        userSocketMap[userId] = socket.id;
+    console.log("a user connected");
+    const user = socket.handshake.query.user;
+    const { handle } = user;
+
+    //todo: if time design a filter based on user settings
+    const onlineVisible = true;
+    if (handle && onlineVisible) {
+        userSocketMap[handle] = socket.id;
     }
 
     // todo devise a mechanism so that i don't have to emit the whole map everytime a user gets online
-    io.emit("getOnlineUsers", Object.keys(userSocketMap))
+    //-- we just emit +handle and -handle each time
+    //user
+    console.log("emittin for getOnlineUsers");
+    io.emit("getOnlineUsers",
+        // `+${handle}`
+        {
+            add: true,
+            delete: false,
+            user: user
+        }
+        // Object.keys(userSocketMap)
+    )
 
     // console.log("A user connected", socket.id);
     socket.on("disconnect", () => {
         // console.log("A user disconnected ", socket.id);
-        delete userSocketMap[userId];
-        io.emit("getOnlineUsers", Object.keys(userSocketMap));
+        delete userSocketMap[handle];
+        console.log("a user disconnected");
+        io.emit("getOnlineUsers", {
+            add: false,
+            delete: true,
+            user: user
+        });
     })
 })
 
-export function getReceiverSocketId(userId) {
-    return userSocketMap[userId];
+export function getReceiverSocketId(handle) {
+    return userSocketMap[handle];
 }
-export { io, app, server }
+// export { io, app, server }

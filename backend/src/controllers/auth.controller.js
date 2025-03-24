@@ -19,10 +19,11 @@ export const signup = async(req, res) => {
         }
         const { uid } = await admin.auth().verifyIdToken(tokenId);
         id_user = uid;
+        console.log("id_user is ", id_user);
         const uq = await handleIsUnique(handle);
         console.log("uq is ", uq);
         if (!handle || (!uq)) {
-            console.log("entered here");
+            console.log("entered here for user deletion");
             await admin.auth().deleteUser(id_user);
             return res.status(400).json({ message: "Handle is Invalid" })
         }
@@ -30,7 +31,8 @@ export const signup = async(req, res) => {
         //todo: just in case check in db if there exists a same email in use if providers are getting used
         try {
             let ans = await get_user(uid)
-            if (!(Object.keys(ans).length === 0 && objectName.constructor === ans)) {
+            console.log("ans is ", ans);
+            if (!(Object.keys(ans).length === 0)) {
                 return res.status(400).json({ message: 'Email already in use' });
             }
         } catch (error) {
@@ -64,7 +66,10 @@ export const signup = async(req, res) => {
             createdAt,
             lastSignInTime
         };
-        console.log("new user is ", newUser);
+
+        // todo:if time change the profilePic link
+
+        // console.log("new user is ", newUser);
         try {
             await save_user(handle, newUser);
         } catch (error) {
@@ -126,13 +131,13 @@ export const logout = (req, res) => {
         });
         return res.status(200).json({ message: "Logged Out Successfully" });
     } catch (error) {
-        console.log("Error in logout controller", error.message);
+        // console.log("Error in logout controller", error.message);
         return res.status(500).json({ message: "Internal Server Error" });
     }
 };
 
 export const updateProfile = async(req, res) => {
-    console.log("entered updating profile fucntion");
+    // console.log("entered updating profile fucntion");
     try {
         const { ProfilePic } = req.body;
         const uid = req.user._id;
@@ -146,7 +151,7 @@ export const updateProfile = async(req, res) => {
         GenerateToken(updatedUser, res);
         res.status(200).json(updatedUser);
     } catch (error) {
-        console.log("error in update profile", error);
+        // console.log("error in update profile", error);
         res.status(500).json({ message: "Internal Server Error" });
     }
 };
@@ -155,7 +160,7 @@ export const checkAuth = async(req, res) => {
     try {
         return res.status(200).json(req.user);
     } catch (error) {
-        console.log("Error in checkAuth controller", message);
+        // console.log("Error in checkAuth controller", message);
         return res.status(500).json({ message: "Internal Server Error" });
     }
 };
@@ -165,7 +170,7 @@ export const giveCookie = (req, res) => {
         const token = GenerateToken(req.user, res);
         res.status(200).json(token);
     } catch (error) {
-        console.log("Error in giveCookie controller", error);
+        // console.log("Error in giveCookie controller", error);
         return res.status(500).json({ message: "Internal Server Error" });
     }
 };

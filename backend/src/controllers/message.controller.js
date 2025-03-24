@@ -1,15 +1,15 @@
-import User from "../models/user.model.js";
-import Message from "../models/message.models.js";
+// import User from "../models/user.model.js";
+// import Message from "../models/message.models.js";
 import cloudinary from "../lib/cloudinary.lib.js";
 import { getReceiverSocketId, io } from "../lib/socket.lib.js";
-import { fetchUsers } from "../lib/db/FireStore.db.lib.js";
+import { fetchUsers, get_conversation, save_message } from "../lib/db/FireStore.db.lib.js";
 
 export const getUsersForSidebar = async(req, res) => {
     try {
         // const loggedInUserId = req.user._id;
         console.log(req.user.handle);
-        const contacts = await fetchUsers(req.user.handle);
-        console.log("contacts is ", contacts);
+        const contacts = await fetchUsers(req.user);
+        // console.log("contacts is ", contacts);
         return res.status(200).json({ filteredUsers: contacts });
         // const filteredUsers = await User.find({ _id: { $ne: loggedInUserId } }).select("-Password");
         // modify only users which we have communicated with
@@ -25,22 +25,13 @@ export const getUsersForSidebar = async(req, res) => {
 
 export const getMessages = async(req, res) => {
     try {
-        const { id: userToChatId } = req.params
-        const myId = req.user._id;
-
-        const messages = await Message.find({
-            $or: [{
-                    senderId: myId,
-                    receiverId: userToChatId
-                },
-                {
-                    senderId: userToChatId,
-                    receiverId: myId
-                }
-            ]
-        })
+        const { id: user2Handle } = req.params;
+        const user_asking = req.user;
+        const {
+            user1Handle
+        } = user_asking;
+        const messages = await get_conversation(user1Handle, user2Handle);
         res.status(200).json(messages)
-            // see how we renamed id to something different
     } catch (error) {
         console.log("Error in getMessages controller ", error.message)
         res.status(500).json({ message: "Internal Server Error" });
@@ -51,8 +42,12 @@ export const sendMessage = async(req, res) => {
 
     try {
         const { text, image } = req.body;
-        const { id: receiverId } = req.params;
-        const senderId = req.user._id;
+        const { id: receiverHandle } = req.params;
+        const { sender } = req.user;
+        const {
+            senderHandle
+        } = sender;
+
 
         let imageUrl;
         if (image) {
@@ -61,24 +56,31 @@ export const sendMessage = async(req, res) => {
             imageUrl = uploadResponse.secure_url;
         };
 
-        const newMessage = new Message({
-            senderId,
-            receiverId,
+
+        const newMessage = ({
+            senderHandle,
+            receiverHandle,
             text,
-            image: imageUrl
+            image: imageUrl,
+            sentAt: Date.now(),
+            sent: true,
         });
 
 
-        await newMessage.save()
+        // await newMessage.save()
+        try {
+            await save_message(newMessage);
+        } catch (error) {
+            newMessage.sent = false;
+            return res.status(400).json(newMessage);
+        }
 
-        //todo: realtime  socket functionality here
-        const receiverSocketId = getReceiverSocketId(receiverId);
+        const receiverSocketId = getReceiverSocketId(receiverHandle);
         if (receiverSocketId) {
-            io.to(receiverSocketId).emit("newMessage", newMessage)
+            io.to(receiverSocketId).emit("newMessage", newMessage);
         }
 
         res.status(201).json(newMessage)
-
     } catch (error) {
         console.log("Error in sendMessage controller ", error.message)
         res.status(500).json({ message: "Internal Server Error" });

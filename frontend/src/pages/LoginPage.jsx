@@ -24,7 +24,7 @@ const LoginPage = () => {
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("called validate form");
+    // console.log("called validate form");
     const success = validateForm();
     if (success) login(FormData);
   };

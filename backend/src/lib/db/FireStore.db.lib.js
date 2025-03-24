@@ -13,17 +13,49 @@ export const save_user = async(handle, user) => {
     const userRef = db.collection("users").doc(handle);
     await userRef.set(user);
     await userRef.collection("Preferences").doc("Settings").set(DefaultSettings);
+    // todo: if time change metadata to contacts for more appropriate naming
     await userRef.collection("ChatData").doc("MetaData").set(DefaultMetaData);
     // console.log("User created and saved in Firestore:");
 };
 
+export const save_message = async(msg) => {
+    const {
+        senderHandle,
+        receiverHandle
+    } = msg;
+    const userRef = db.collection("users").doc(senderHandle);
+    await userRef.collection(receiverHandle).add(msg);
+}
+
 export const get_user = async(uid) => {
     const userDoc = await db.collection("users").where("_id", "==", uid).get();
-    if (userDoc.length == 0) return {}
+    if (userDoc._size == 0) {
+        return ({})
+    }
     const user = userDoc.docs[0].data();
     return user;
     // console.log(userDoc.map((user) => user.data()));
 }
+
+export const get_conversation = async(user1Handle, user2Handle) => {
+    let messages = [];
+    const userRef1 = db.collection("users").doc(user1Handle);
+    const messages1Snapshot = await userRef1.collection(user2Handle).get();
+    if (messages1Snapshot._size > 0) {
+        messages1Snapshot.forEach((doc) => {
+            messages.push(doc.data);
+        })
+    }
+    const userRef2 = db.collection("users").doc(user2Handle);
+    const messages2Snapshot = await userRef2.collection(user1Handle).get();
+    if (messages2Snapshot._size > 0) {
+        messages2Snapshot.forEach((doc) => {
+            messages.push(doc.data);
+        })
+    }
+    return messages;
+}
+
 
 export const update_user = async(uid, user) => {
 
@@ -35,23 +67,20 @@ export const update_user = async(uid, user) => {
 }
 
 // todo: create this
-export const fetchUsers = async(handle) => {
-    console.log("handle is", handle);
+export const fetchUsers = async(user) => {
+    const { handle } = user;
+    // console.log("handle is", handle);
     const userRef = db.collection("users").doc(handle);
     const { UsersChattedWith } = (await userRef.collection("ChatData").doc("MetaData").get()).data();
+    UsersChattedWith.push(user);
     // console.log("users is chatted with ", UsersChattedWith);
-    return UsersChattedWith
+    return UsersChattedWith;
 }
 
 // todo create this 
 export const searchAll = async(prefix) => {
     // return all the handles that are matched by this prefix;
 }
-
-export const getUserByHandle = async(handle) => {
-
-}
-
 
 /* //todo :Make function for retrieving the user based on handle 
  */
@@ -60,28 +89,29 @@ export const getUserByHandle = async(handle) => {
 
 export const handleIsUnique = async(handle) => {
     const userDoc = (await db.collection("users").doc(handle).get()).data();
-    console.log("user Doc is", userDoc);
+    // console.log("user Doc is", userDoc);
     if (userDoc) {
-        console.log("returning false");
+        // console.log("returning false");
         return false;
     } else {
-        console.log("returning true");
+        // console.log("returning true");
         return true;
     };
 }
 
 export const unique_handle = async(req, res) => {
-    console.log("unique_handle called");
+    // console.log("unique_handle called");
     const { handle } = req.body;
-    console.log("handle is ", handle);
+    // console.log("handle is ", handle);
     try {
         const ans = await handleIsUnique(handle);
-        console.log('ans is', ans);
+        // console.log('ans is', ans);
         return res.status(200).json({ unique_handle: ans })
     } catch (error) {
         return res.status(500).json({ message: "Internal Server Error" });
     };
 }
+
 
 
 //-------------MESSAGE FUNCTIONALITY-----------------------------

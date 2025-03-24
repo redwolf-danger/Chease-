@@ -37,14 +37,14 @@ const SignUpPage = () => {
   // todo: define the onsearch frunciton
   const onSearch = async (query) => {
     try {
-      console.log("called uniqueHandle");
+      // console.log("called uniqueHandle");
       const res = await axiosInstance.post(`/auth/uniqueHandle`, {
         handle: query,
       });
-      console.log("res is", res);
+      // console.log("res is", res);
       setUnique(res.data.unique_handle);
     } catch (error) {
-      console.log(error);
+      // console.log(error);
     } finally {
       setSearching(false);
     }
@@ -53,7 +53,7 @@ const SignUpPage = () => {
   // todo: add useEffects here
   useEffect(() => {
     const handler = setTimeout(() => {
-      console.log("calling debounced query");
+      // console.log("calling debounced query");
       setDebouncedQuery(handle);
     }, 500); // Delay of 500ms
     return () => clearTimeout(handler);
@@ -62,12 +62,12 @@ const SignUpPage = () => {
   // useEffect(() => {
     const setDebouncedQuery = (debouncedQuery)=>{
     if (debouncedQuery && validateHandle()) {
-      console.log("calling on search function");
+      // console.log("calling on search function");
       onSearch(debouncedQuery);
       // query is not empty only then call it
     }
     else{
-      console.log("here...")
+      // console.log("here...")
       setSearching(false);
     }
   }

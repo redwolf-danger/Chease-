@@ -15,7 +15,7 @@ export const useAuthStore = create((set, get) => ({
     isUpdatingProfile: false,
     isCheckingAuth: true,
     socket: null,
-    onlineUsers: [],
+    onlineUsers: {},
     // todo: modify check method
     checkAuth: async() => {
         try {
@@ -183,6 +183,7 @@ export const useAuthStore = create((set, get) => ({
     //     }
     // },
     updateProfile: async(data) => {
+        // TODO: SEE THIS FOR UPDATION
         set({ isUpdatingProfile: true });
         try {
             const res = await axiosInstance.put("/auth/update-profile", data);
@@ -200,21 +201,37 @@ export const useAuthStore = create((set, get) => ({
             set({ isUpdatingProfile: false });
         }
     },
+    // WE DON'T HAVE A PROBLEM IN OTHERS UNAUTHORISED USERS CONNECT TO IT
+    // BUT WE DO HAVE A PORBLEM WHEN THEY START DOING THINGS THEY SHOULDN'T BE ABLE TO DO LIKE SENDING MESSAGES
     connectSocket: () => {
-        const { authUser } = get()
+        const { authUser, onlineUsers } = get();
         const already = get().socket
+        console.log("auth user is ", authUser);
         if (!authUser || already && already.connected) return;
 
 
         const socket = io(BASE_URL, {
             query: {
-                userId: authUser._id,
+                // userId: authUser._id,
+                user: authUser
             }
+
         });
         socket.connect();
         set({ socket });
-        socket.on("getOnlineUsers", (userIds) => {
-            set({ onlineUsers: userIds });
+        socket.on("getOnlineUsers", (handle_modified) => {
+            console.log("received for ", handle_modified);
+            const user = handle_modified.user;
+            const { handle } = user;
+            if (handle_modified.add) {
+                // handle to be added
+                onlineUsers[handle] = user;
+
+            } else {
+                //handled to be subtracted
+                delete onlineUsers[handle];
+            }
+            set({ onlineUsers });
         });
 
     },

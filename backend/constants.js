@@ -3,6 +3,6 @@ export const DefaultSettings = {
 }
 export const DefaultMetaData = {
     UsersChattedWith: [
-        "titli"
+        // "titli"
     ]
 }

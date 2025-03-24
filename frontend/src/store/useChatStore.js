@@ -15,7 +15,7 @@ export const useChatStore = create((set, get) => ({
             messages
         } = get();
         try {
-            const res = await axiosInstance.post(`/messages/send/${selectedUser._id}`, msg);
+            const res = await axiosInstance.post(`/messages/send/${selectedUser.handle}`, msg);
             set({ messages: [...messages, res.data] });
         } catch (error) {
             toast.error(error.response.data.message)
@@ -32,12 +32,13 @@ export const useChatStore = create((set, get) => ({
             set({ isUsersLoading: false });
         }
     },
-    getMessages: async(userId) => {
+    // todo: change userId to userHandle wherever this is used
+    getMessages: async(user2Handle) => {
         set({
             isMessagesLoading: true
         });
         try {
-            const res = await axiosInstance.get(`/messages/${userId}`);
+            const res = await axiosInstance.get(`/messages/${user2Handle}`);
             set({ messages: res.data });
         } catch (error) {
             toast.error(error.response.data.message);

@@ -24,6 +24,7 @@ const SignUpPage = () => {
     handle: "",
   });
 
+  // const [accordion,setAccordion] = useState(false);
   // all these are for "handle" field
   // const [typed,setTyped] = useState(false);
   const [empty, setEmpty] = useState(true);
@@ -131,9 +132,9 @@ const SignUpPage = () => {
                 <span>
                   {!empty &&
                     (searching ? (
-                      <>
-                        <Loader2 className="size-3 animate-spin" />
-                      </>
+                      <span className="flex items-center justify-center">
+                        <Loader2 className="size-4 animate-spin" />
+                      </span>
                     ) : (
                       <>
                         {unique ? (
@@ -173,53 +174,9 @@ const SignUpPage = () => {
               </div>
             </div>
 
-            {/* <div className="form-control">
-              <label className="label">
-                <span className="label-text font-medium">Email</span>
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail className="size-5 text-base-content/40" />
-                </div>
-                <input
-                  type="email"
-                  className={`input input-bordered w-full pl-10`}
-                  placeholder="you@example.com"
-                  value={FormData.Email}
-                  onChange={(e) => setFormData({ ...FormData, Email: e.target.value })}
-                />
-              </div>
-            </div>
+        
+            
 
-
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text font-medium">Password</span>
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="size-5 text-base-content/40" />
-                </div>
-                <input
-                  type={ShowPassword ? "text" : "password"}
-                  className={`input input-bordered w-full pl-10`}
-                  placeholder="••••••••"
-                  value={FormData.Password}
-                  onChange={(e) => setFormData({ ...FormData, Password: e.target.value })}
-                />
-                <button
-                  type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                  onClick={() => setShowPassword(!ShowPassword)}
-                >
-                  {ShowPassword ? (
-                    <EyeOff className="size-5 text-base-content/40" />
-                  ) : (
-                    <Eye className="size-5 text-base-content/40" />
-                  )}
-                </button>
-              </div>
-            </div> */}
 
             {/* <button type="submit" className="btn btn-primary w-full" disabled={isSigningUp}>
               {isSigningUp ? (
@@ -231,15 +188,21 @@ const SignUpPage = () => {
                 "Create Account"
               )}
             </button> */}
-            <div className="w-full flex justify-around">
-
+            <div id="accordion-collapse" data-accordion="collapse">
+            <div className="w-full flex justify-around" 
+            //hidden={accordion} 
+            >
               {/* Mail button */}
-              <button >
+              <button type="button" data-accordion-target="#accordion-collapse-body-1" onClick={(e)=>{
+                // console.log("clicked email icon")
+                // console.log("e is",e);
+                // setAccordion(!accordion);
+              }} disabled={isSigningUp}>
                 <Mail />
               </button>
 
               {/* google button */}
-              <button>
+              <button type ="button" disabled={isSigningUp}>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   x="0px"
@@ -267,6 +230,58 @@ const SignUpPage = () => {
                 </svg>
               </button>
 
+            </div>
+
+              {/* ACCORDION */}
+            <div 
+            // hidden = {!accordion}
+             id="accordion-collapse-body-1">
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text font-medium">Email</span>
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Mail className="size-5 text-base-content/40" />
+                </div>
+                <input
+                  type="email"
+                  className={`input input-bordered w-full pl-10`}
+                  placeholder="you@example.com"
+                  value={FormData.Email}
+                  onChange={(e) => setFormData({ ...FormData, Email: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text font-medium">Password</span>
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Lock className="size-5 text-base-content/40" />
+                </div>
+                <input
+                  type={ShowPassword ? "text" : "password"}
+                  className={`input input-bordered w-full pl-10`}
+                  placeholder="••••••••"
+                  value={FormData.Password}
+                  onChange={(e) => setFormData({ ...FormData, Password: e.target.value })}
+                />
+                <button
+                  type="button"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  onClick={() => setShowPassword(!ShowPassword)}
+                >
+                  {ShowPassword ? (
+                    <EyeOff className="size-5 text-base-content/40" />
+                  ) : (
+                    <Eye className="size-5 text-base-content/40" />
+                  )}
+                </button>
+              </div>
+            </div>
+            </div>
             </div>
           </form>
 

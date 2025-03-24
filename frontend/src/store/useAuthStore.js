@@ -52,11 +52,12 @@ export const useAuthStore = create((set, get) => ({
             console.log("error message is ", errorMessage);
             console.log(error);
             toast.error("Error in Signing up")
-                // if (errorCode == "auth/email-already-in-use") {
-                //     toast.error("Email is already in use");
-                // } else {
-                //     toast.error(error.response.data.message)
-                // }
+            toast.error(error.response.data.message);
+            // if (errorCode == "auth/email-already-in-use") {
+            //     toast.error("Email is already in use");
+            // } else {
+            //     toast.error(error.response.data.message)
+            // }
         } finally {
             set({ isSigningUp: false });
         }

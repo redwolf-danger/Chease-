@@ -19,6 +19,7 @@ export const save_user = async(handle, user) => {
 
 export const get_user = async(uid) => {
     const userDoc = await db.collection("users").where("_id", "==", uid).get();
+    if (userDoc.length == 0) return {}
     const user = userDoc.docs[0].data();
     return user;
     // console.log(userDoc.map((user) => user.data()));

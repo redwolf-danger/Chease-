@@ -11,6 +11,7 @@ export const GenerateToken = (user, res) => {
     const moderator = 'true';
     // todo:set it to something else
     const now = new Date();
+    console.log("generating token");
     const jwt_token = jwt.sign({
         aud: 'jitsi',
         context: {

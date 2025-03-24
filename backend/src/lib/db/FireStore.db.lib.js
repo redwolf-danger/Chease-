@@ -57,17 +57,26 @@ export const getUserByHandle = async(handle) => {
 // todo: change the logo of the app
 // todo: change the box design 
 
+export const handleIsUnique = async(handle) => {
+    const userDoc = (await db.collection("users").doc(handle).get()).data();
+    console.log("user Doc is", userDoc);
+    if (userDoc) {
+        console.log("returning false");
+        return false;
+    } else {
+        console.log("returning true");
+        return true;
+    };
+}
+
 export const unique_handle = async(req, res) => {
-    // console.log("unique_handle called");
+    console.log("unique_handle called");
     const { handle } = req.body;
-    // console.log("handle is ", handle);
+    console.log("handle is ", handle);
     try {
-        const userDoc = await db.collection("users").doc(handle).get();
-        if (!userDoc) {
-            return res.status(200).json({ unique_handle: true });
-        } else {
-            return res.status(200).json({ unique_handle: true });
-        }
+        const ans = await handleIsUnique(handle);
+        console.log('ans is', ans);
+        return res.status(200).json({ unique_handle: ans })
     } catch (error) {
         return res.status(500).json({ message: "Internal Server Error" });
     };

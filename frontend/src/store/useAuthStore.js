@@ -31,13 +31,12 @@ export const useAuthStore = create((set, get) => ({
             set({ isCheckingAuth: false });
         }
     },
-    googleSignIn: async() => {
+    googleSignIn: async(handle) => {
         set({ isSigningUp: true });
         try {
             const result = await signInWithPopup(auth, provider);
             const tokenId = await result.user.getIdToken();
             // todo: add a way to get unique handle 
-            const handle = "this_unique";
             const data = {
                 tokenId,
                 handle
@@ -53,16 +52,46 @@ export const useAuthStore = create((set, get) => ({
             console.log("error message is ", errorMessage);
             console.log(error);
             toast.error("Error in Signing up")
-            if (errorCode == "auth/email-already-in-use") {
-                toast.error("Email is already in use");
-            } else {
-                toast.error(error.response.data.message)
-            }
+                // if (errorCode == "auth/email-already-in-use") {
+                //     toast.error("Email is already in use");
+                // } else {
+                //     toast.error(error.response.data.message)
+                // }
         } finally {
             set({ isSigningUp: false });
         }
     },
-    signup: async({ FullName, Email, Password }) => {
+    // todo: correct this function
+    googleLogIn: async() => {
+        set({ isLoggingIn: true });
+        try {
+            const result = await signInWithPopup(auth, provider);
+            const tokenId = await result.user.getIdToken();
+            // todo: add a way to get unique handle 
+            const data = {
+                tokenId,
+            };
+            const res = await axiosInstance.post("/auth/login", data);
+            toast.success("Logged in Successfully");
+            set({ authUser: res.data });
+            get().connectSocket()
+        } catch (error) {
+            const errorCode = error.code;
+            const errorMessage = error.message;
+            console.log("error code is", errorCode);
+            console.log("error message is ", errorMessage);
+            console.log(error);
+            toast.error("Error in Logging In up")
+                // if (errorCode == "auth/email-already-in-use") {
+                //     toast.error("Email is already in use");
+                // } else {
+                //     toast.error(error.response.data.message)
+                // }
+        } finally {
+            set({ isLoggingIn: false });
+        }
+    },
+    signup: async({ FullName, Email, Password, handle }) => {
         set({ isSigningUp: true });
         try {
             const { user } = await createUserWithEmailAndPassword(auth, Email, Password);
@@ -71,7 +100,6 @@ export const useAuthStore = create((set, get) => ({
             });
             const tokenId = await auth.currentUser.getIdToken();
             // todo: add a way to get "unique" handle 
-            const handle = "this_unique" + `${Math.random() * 10}`;
             const data = {
                 tokenId,
                 handle

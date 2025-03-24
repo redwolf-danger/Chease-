@@ -1,5 +1,5 @@
 import cloudinary from "../lib/cloudinary.lib.js";
-import { get_user, save_user, update_user } from "../lib/db/FireStore.db.lib.js";
+import { get_user, handleIsUnique, save_user, unique_handle, update_user } from "../lib/db/FireStore.db.lib.js";
 import { GenerateToken } from "../lib/utils.lib.js";
 import admin from "firebase-admin"
 
@@ -7,14 +7,31 @@ import admin from "firebase-admin"
 export const signup = async(req, res) => {
     //todo: check for fields format more strictly on the firebase backend
 
-    //todo: check if handle is unique
     console.log("called signup function")
-    const { tokenId, handle } = req.body
-    console.log("token is", tokenId)
-        //verify the token and if it is correct make a jwt 
+
+
+    //verify the token and if it is correct make a jwt 
     try {
+        const { tokenId, handle } = req.body
+        console.log("token is", tokenId)
+        console.log("handle is", handle);
+        if (!tokenId) {
+            return res.status(400).json({ message: "Invalid Token Provided" })
+        }
+        const uq = await handleIsUnique(handle);
+        console.log("uq is ", uq);
+        if (!handle || (!uq)) {
+            console.log("entered here");
+            return res.status(400).json({ message: "Handle is Invalid" })
+        }
         const { uid } = await admin.auth().verifyIdToken(tokenId);
-        const x = await admin.auth().getUser(uid);
+        let x;
+        try {
+            x = await admin.auth().getUser(uid);
+            console.log("x is", x);
+        } catch (error) {
+            res.status(400).json({ message: "Internal Server Error" })
+        }
         const {
             photoURL: ProfilePic,
             displayName: FullName,
@@ -34,23 +51,32 @@ export const signup = async(req, res) => {
             lastSignInTime
         };
         console.log("new user is ", newUser);
-        await save_user(handle, newUser);
-
+        try {
+            await save_user(handle, newUser);
+        } catch (error) {
+            return res.status(400).json({ message: "Internal Server Error" });
+        }
         GenerateToken(newUser, res);
         return res.status(201).json(newUser);
     } catch (error) {
         console.log(error);
-        return res.status(400).json({ message: "Invalid User data" })
+        return res.status(400).json({ message: "Invalid User Data" })
     }
 };
 export const login = async(req, res) => {
-    //todo: check for fields format more strictly on the firebase backend
-
     const { tokenId } = req.body;
+    if (!tokenId) {
+        return res.status(400).json({ message: "Invalid Token Provided" })
+    }
     //verify the token and if it is correct make a jwt 
     try {
         const { uid } = await admin.auth().verifyIdToken(tokenId);
-        const x = await admin.auth().getUser(uid);
+        let x;
+        try {
+            x = await admin.auth().getUser(uid);
+        } catch (error) {
+            res.status(400).json({ message: "Internal Server Error" })
+        }
         const {
             photoURL: ProfilePic,
             displayName: FullName,

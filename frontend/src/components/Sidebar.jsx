@@ -40,8 +40,7 @@ const Sidebar = () => {
               <span className="text-sm">Show online only</span>
             </label>
             <span className="text-xs text-zinc-500">
-              ({Object.keys(onlineUsers).length - 1} online)
-              {/*  //todo: decide whether to do -1 or not */}
+              ({Object.keys(onlineUsers).length} online)
             </span>
           </div>
         </div>
@@ -85,7 +84,7 @@ const Sidebar = () => {
                 </div>
               </button>
             ))}
-          {filteredUsers && (
+          {(filteredUsers.length == 0) && (
             <div className="text-center text-zinc-500 py-4">
               No Online Users
             </div>

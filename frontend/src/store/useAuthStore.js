@@ -192,12 +192,12 @@ export const useAuthStore = create((set, get) => ({
     connectSocket: () => {
         const { authUser, onlineUsers } = get();
         const already = get().socket
-        console.log("auth user is ", authUser);
+            // console.log("auth user is ", authUser);
         if (!authUser || already && already.connected) return;
 
-        console.log("creating socket");
-        console.log("base url is ", BASE_URL);
-        console.log("supplying with ", authUser);
+        // console.log("creating socket");
+        // console.log("base url is ", BASE_URL);
+        // console.log("supplying with ", authUser);
         const socket = io(BASE_URL, {
             query: {
                 user: JSON.stringify(authUser)
@@ -207,26 +207,25 @@ export const useAuthStore = create((set, get) => ({
         });
 
 
-        console.log("connecting the socket");
+        // console.log("connecting the socket");
         socket.connect();
-        socket.onAny((eventName, ...args) => {
-            console.log(eventName);
-            console.log(args);
-        });
-        socket.onAnyOutgoing((eventName, ...args) => {
-            console.log(eventName);
-            console.log(args);
-        });
+        // socket.onAny((eventName, ...args) => {
+        // console.log(eventName);
+        // console.log(args);
+        // }); socket.onAnyOutgoing((eventName, ...args) => {
+        // console.log(eventName);
+        // console.log(args);
+        // });
 
 
         // todo: unccmment portions of code here
         socket.on('connect', () => {
-            console.log('connected to server');
+            // console.log('connected to server');
         })
         set({ socket });
 
         socket.on("getOnlineUsers", (handle_modified) => {
-            console.log("received for ", handle_modified);
+            // console.log("received for ", handle_modified);
             const user = handle_modified.user;
             const { handle } = user;
             if (handle_modified.add) {

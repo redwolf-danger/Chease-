@@ -39,6 +39,7 @@ export const GenerateToken = (user, res) => {
         nbf: (Math.round((new Date).getTime() / 1000) - 10)
     }, fs.readFileSync(path.join(__dirname, "PrivateKey.pk"), 'utf8'), { algorithm: 'RS256', header: { kid: process.env.KID } })
 
+
     res.cookie("jwt", jwt_token, {
         maxAge: 7 * 24 * 3600 * 1000,
         httpOnly: true,
@@ -47,6 +48,7 @@ export const GenerateToken = (user, res) => {
         secure: process.env.NODE_ENV !== "development"
             // true if in productions
     });
+    console.log("finished generating token");
     return jwt_token;
 }
 

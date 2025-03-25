@@ -15,15 +15,29 @@ export const save_user = async(handle, user) => {
     await userRef.collection("Preferences").doc("Settings").set(DefaultSettings);
     // todo: if time change metadata to contacts for more appropriate naming
     await userRef.collection("ChatData").doc("MetaData").set(DefaultMetaData);
+    const newMessage = ({
+        senderHandle: handle,
+        receiverHandle: handle,
+        text: "Don't forget to say Chease📸 Send yourself important messages here ✅",
+        image: "",
+        sentAt: Date.now(),
+        sent: true,
+        admin: false,
+    });
+    save_message(newMessage);
     // console.log("User created and saved in Firestore:");
 };
+
 
 export const save_message = async(msg) => {
     const {
         senderHandle,
         receiverHandle
     } = msg;
+    console.log("senderHandle is", senderHandle);
+    console.log("receiverHandle is", receiverHandle);
     const userRef = db.collection("users").doc(senderHandle);
+    console.log("reached here");
     await userRef.collection(receiverHandle).add(msg);
 }
 
@@ -39,13 +53,18 @@ export const get_user = async(uid) => {
 
 export const get_conversation = async(user1Handle, user2Handle) => {
     let messages = [];
+    // console.log("user1Handle = ", user1Handle);
+    // console.log("user2Handle = ", user2Handle);
     const userRef1 = db.collection("users").doc(user1Handle);
+    // console.log("fethcing data");
     const messages1Snapshot = await userRef1.collection(user2Handle).get();
+    // console.log("got all the data");
     if (messages1Snapshot._size > 0) {
         messages1Snapshot.forEach((doc) => {
-            messages.push(doc.data);
+            messages.push(doc.data());
         })
     }
+    if (user1Handle === user2Handle) return messages;
     const userRef2 = db.collection("users").doc(user2Handle);
     const messages2Snapshot = await userRef2.collection(user1Handle).get();
     if (messages2Snapshot._size > 0) {
@@ -61,6 +80,7 @@ export const update_user = async(uid, user) => {
 
     const { handle } = await get_user(uid);
     await db.collection("users").doc(handle).update(user);
+    return get_user(uid);
     // return ans;
     // console.log("usar now updated");
 

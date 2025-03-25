@@ -28,7 +28,7 @@ export const protectRoute = async(req, res, next) => {
         }
         req.user = user;
         console.log("Middleware passed");
-        // console.log("from middlewar user = , ", user)
+        console.log("from middlewar user = , ", user)
         next();
 
 

@@ -7,23 +7,23 @@ import admin from "firebase-admin"
 export const signup = async(req, res) => {
     //todo: check for fields format more strictly on the firebase backend
 
-    console.log("called signup function")
-        //verify the token and if it is correct make a jwt 
+    // console.log("called signup function")
+    //verify the token and if it is correct make a jwt 
     let id_user;
     try {
         const { tokenId, handle } = req.body
-        console.log("token is", tokenId)
-        console.log("handle is", handle);
+            // console.log("token is", tokenId)
+            // console.log("handle is", handle);
         if (!tokenId) {
             return res.status(400).json({ message: "Invalid Token Provided" })
         }
         const { uid } = await admin.auth().verifyIdToken(tokenId);
         id_user = uid;
-        console.log("id_user is ", id_user);
+        // console.log("id_user is ", id_user);
         const uq = await handleIsUnique(handle);
-        console.log("uq is ", uq);
+        // console.log("uq is ", uq);
         if (!handle || (!uq)) {
-            console.log("entered here for user deletion");
+            // console.log("entered here for user deletion");
             await admin.auth().deleteUser(id_user);
             return res.status(400).json({ message: "Handle is Invalid" })
         }
@@ -31,7 +31,7 @@ export const signup = async(req, res) => {
         //todo: just in case check in db if there exists a same email in use if providers are getting used
         try {
             let ans = await get_user(uid)
-            console.log("ans is ", ans);
+                // console.log("ans is ", ans);
             if (!(Object.keys(ans).length === 0)) {
                 return res.status(400).json({ message: 'Email already in use' });
             }
@@ -43,7 +43,7 @@ export const signup = async(req, res) => {
         let x;
         try {
             x = await admin.auth().getUser(uid);
-            console.log("x is", x);
+            // console.log("x is", x);
         } catch (error) {
             await admin.auth().deleteUser(id_user);
             return res.status(400).json({ message: "Internal Server Error" })
@@ -77,6 +77,10 @@ export const signup = async(req, res) => {
             return res.status(400).json({ message: "Internal Server Error" });
         }
         GenerateToken(newUser, res);
+        // console.log("new user is ", newUser);
+        if (newUser._id) {
+            delete newUser._id;
+        }
         return res.status(201).json(newUser);
     } catch (error) {
         console.log(error);
@@ -107,7 +111,7 @@ export const login = async(req, res) => {
                 lastSignInTime
             }
         } = x;
-        const newUser = {
+        let newUser = {
             ProfilePic: ProfilePic ? ProfilePic : "",
             FullName,
             Email,
@@ -116,8 +120,11 @@ export const login = async(req, res) => {
             lastSignInTime
         };
         // console.log("new user is ", newUser);
-        update_user(uid, newUser);
+        newUser = await update_user(uid, newUser);
         GenerateToken(newUser, res);
+        if (newUser._id) {
+            delete newUser._id;
+        }
         return res.status(201).json(newUser);
     } catch (error) {
         // console.log(error);
@@ -146,9 +153,12 @@ export const updateProfile = async(req, res) => {
         }
         const upload_resp = await cloudinary.uploader.upload(ProfilePic);
         // todo: instead of this update the user in firestore
-        const updatedUser = {...req.user, ProfilePic: upload_resp.secure_url };
-        await update_user(uid, updatedUser);
+        let updatedUser = {...req.user, ProfilePic: upload_resp.secure_url };
+        updatedUser = await update_user(uid, updatedUser);
         GenerateToken(updatedUser, res);
+        if (newUser._id) {
+            delete newUser._id;
+        }
         res.status(200).json(updatedUser);
     } catch (error) {
         // console.log("error in update profile", error);

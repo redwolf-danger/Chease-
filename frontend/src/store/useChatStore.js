@@ -45,7 +45,6 @@ export const useChatStore = create((set, get) => ({
         } finally {
             set({ isMessagesLoading: false });
         }
-
     },
     subscribeToMessages: () => {
         const { selectedUser } = get();

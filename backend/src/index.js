@@ -5,7 +5,7 @@ import dotenv from "dotenv"
 import { connectDB } from './lib/db.lib.js';
 import cookieParser from "cookie-parser"
 import cors from "cors"
-import { app, server } from "./lib/socket.lib.js"
+import { app, init_ws, server } from "./lib/socket.lib.js"
 import path from "path";
 import { FireApp } from "./lib/db/FireBase.db.lib.js";
 
@@ -13,9 +13,7 @@ if (FireApp) {
     console.log("FireBase is running .... ");
 }
 
-
 const __dirname = path.resolve();
-
 
 
 dotenv.config(); //to add dotenv inside the process space
@@ -40,6 +38,7 @@ if (process.env.NODE_ENV === "production") {
 
 
 server.listen(port, () => {
-    console.log("server is running");
-    connectDB()
+    console.log("server is running on port", port);
+    init_ws();
+    // connectDB()
 })

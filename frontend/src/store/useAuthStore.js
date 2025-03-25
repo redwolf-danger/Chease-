@@ -7,7 +7,8 @@ import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfi
 
 
 const BASE_URL =
-    import.meta.env.MODE === "development" ? "http://localhost:5001/api" : "/";
+    // TODO : CHANGE THIS TO http://localhost:5001/api
+    import.meta.env.MODE === "development" ? "localhost:5001/" : "/";
 export const useAuthStore = create((set, get) => ({
     authUser: null,
     isSigningUp: false,
@@ -167,21 +168,6 @@ export const useAuthStore = create((set, get) => ({
             set({ isLoggingIn: false });
         };
     },
-    // todo: change this (uncomment this)
-    // login: async(data) => {
-    //     set({ isLoggingIn: true });
-    //     try {
-    //         const res = await axiosInstance.post("/auth/login", data);
-    //         set({ authUser: res.data });
-    //         get().connectSocket()
-    //         toast.success("Logged In successfully");
-
-    //     } catch {
-    //         toast.error("Failed to Log In. Try Again")
-    //     } finally {
-    //         set({ isLoggingIn: false });
-    //     }
-    // },
     updateProfile: async(data) => {
         // TODO: SEE THIS FOR UPDATION
         set({ isUpdatingProfile: true });
@@ -209,16 +195,36 @@ export const useAuthStore = create((set, get) => ({
         console.log("auth user is ", authUser);
         if (!authUser || already && already.connected) return;
 
-
+        console.log("creating socket");
+        console.log("base url is ", BASE_URL);
+        console.log("supplying with ", authUser);
         const socket = io(BASE_URL, {
             query: {
-                // userId: authUser._id,
-                user: authUser
-            }
-
+                user: JSON.stringify(authUser)
+            },
+            ackTimeout: 4000,
+            retries: 3
         });
+
+
+        console.log("connecting the socket");
         socket.connect();
+        socket.onAny((eventName, ...args) => {
+            console.log(eventName);
+            console.log(args);
+        });
+        socket.onAnyOutgoing((eventName, ...args) => {
+            console.log(eventName);
+            console.log(args);
+        });
+
+
+        // todo: unccmment portions of code here
+        socket.on('connect', () => {
+            console.log('connected to server');
+        })
         set({ socket });
+
         socket.on("getOnlineUsers", (handle_modified) => {
             console.log("received for ", handle_modified);
             const user = handle_modified.user;

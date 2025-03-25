@@ -1,5 +1,5 @@
 import cloudinary from "../lib/cloudinary.lib.js";
-import { get_user, handleIsUnique, save_user, unique_handle, update_user } from "../lib/db/FireStore.db.lib.js";
+import { get_user, handleIsUnique, save_user, update_user } from "../lib/db/FireStore.db.lib.js";
 import { GenerateToken } from "../lib/utils.lib.js";
 import admin from "firebase-admin"
 
